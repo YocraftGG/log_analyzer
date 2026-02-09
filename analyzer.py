@@ -9,3 +9,8 @@ def filter_by_port(data):
 
 def filter_by_size(data):
     return [line for line in data if int(line[5]) > 5000]
+
+def tag_traffic(data):
+    return [line + ["LARGE"] if int(line[5]) > 5000 else line + ["NORMAL"] for line in data]
+
+print(tag_traffic(load_csv("network_traffic.log")))
