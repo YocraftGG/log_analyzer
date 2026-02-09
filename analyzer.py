@@ -6,3 +6,6 @@ def extract_external_ip(data):
 
 def filter_by_port(data):
     return [line for line in data if line[3] == "22" or line[3] == "23" or line[3] == "3389"]
+
+def filter_by_size(data):
+    return [line for line in data if int(line[5]) > 5000]
