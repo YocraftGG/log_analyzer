@@ -1,0 +1,16 @@
+from practice.log_analyzer.reader import load_csv
+
+
+def extract_external_ip(data):
+    return [line[1] for line in data if not line[1].startswith("192.168") and not line[1].startswith("10")]
+
+def filter_by_port(data):
+    return [line for line in data if line[3] == "22" or line[3] == "23" or line[3] == "3389"]
+
+def filter_by_size(data):
+    return [line for line in data if int(line[5]) > 5000]
+
+def tag_traffic(data):
+    return [line + ["LARGE"] if int(line[5]) > 5000 else line + ["NORMAL"] for line in data]
+
+print(tag_traffic(load_csv("network_traffic.log")))
