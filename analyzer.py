@@ -16,3 +16,6 @@ def tag_traffic(data):
 
 def count_ip_calls(data):
     return {line_i[1]:sum([1 for line_j in data if line_j[1] == line_i[1]]) for index, line_i in enumerate(data) if line_i[1] not in [line_j[1] for line_j in data[:index]]}
+
+def map_port_to_protocol(data):
+    return {line[3]:line[4] for line in data}
