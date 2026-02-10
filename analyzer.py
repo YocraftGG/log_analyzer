@@ -44,3 +44,6 @@ def identifying_suspicions(data):
 
 def filter_suspicions(suspects):
     return {ip:suspicions for ip, suspicions in suspects.items() if len(suspicions) >= 2}
+
+def extract_hours(timestamps):
+    return list (map(lambda timestamp: int(timestamp.split(" ")[1].split(":")[0]), timestamps))
