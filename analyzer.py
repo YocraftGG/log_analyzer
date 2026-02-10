@@ -30,9 +30,17 @@ def suspicions(line):
         lst.append("PORT_SENSITIVE")
     if int(line[5]) > SIZE:
         lst.append("PACKET_LARGE")
-    if NIGHT_ACTIVITY[0] <= int(line[0].split(" ")[1].split(":")[0]) < NIGHT_ACTIVITY[1]:
-        lst.append("ACTIVITY_NIGHT")
+    hour = int(line[0].split(" ")[1].split(":")[0])
+    if NIGHT_ACTIVITY[0] < NIGHT_ACTIVITY[1]:
+        if NIGHT_ACTIVITY[0] <= hour < NIGHT_ACTIVITY[1]:
+            lst.append("ACTIVITY_NIGHT")
+    else:
+        if NIGHT_ACTIVITY[0] <= hour < 0 or hour < NIGHT_ACTIVITY[1]:
+            lst.append("ACTIVITY_NIGHT")
     return lst
 
 def identifying_suspicions(data):
     return {line[1]:suspicions(line) for line in data if suspicions(line)}
+
+def filter_suspicions(suspects):
+    return {ip:suspicions for ip, suspicions in suspects.items() if len(suspicions) >= 2}
