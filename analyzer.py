@@ -77,3 +77,6 @@ def add_suspicion_details(lines):
     for line in lines:
         if suspicions(list(line)):
             yield list(line), suspicions(list(line))
+
+def count_items(lines):
+    return sum(1 for line in lines if suspicions(list(line)))
