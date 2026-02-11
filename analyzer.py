@@ -72,3 +72,8 @@ def filter_suspicious(lines):
     for line in lines:
         if suspicions(list(line)):
             yield line
+
+def add_suspicion_details(lines):
+    for line in lines:
+        if suspicions(list(line)):
+            yield list(line), suspicions(list(line))
