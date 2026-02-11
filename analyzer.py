@@ -1,5 +1,5 @@
 from config import *
-from reader import load_csv
+from reader import *
 
 
 def extract_external_ip(data):
