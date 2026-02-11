@@ -65,3 +65,5 @@ lambda line: int(line[5]) > SIZE, "NIGHT_ACTIVITY": lambda line: is_night_activi
 
 def line_checks(line, checks):
     return list(map(lambda sus: sus[0], filter(lambda sus: sus[1](line), checks.items())))
+
+data_checks = list(filter(lambda suspicions: suspicions,map(lambda line: line_checks(line, suspicion_checks), load_csv("network_traffic.log"))))
