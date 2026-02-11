@@ -1,5 +1,5 @@
 from config import *
-from reader import load_csv
+from reader import *
 
 
 def extract_external_ip(data):
@@ -67,3 +67,22 @@ def line_checks(line, checks):
     return list(map(lambda sus: sus[0], filter(lambda sus: sus[1](line), checks.items())))
 
 data_checks = list(filter(lambda suspicions: suspicions,map(lambda line: line_checks(line, suspicion_checks), load_csv("network_traffic.log"))))
+
+def filter_suspicious(lines):
+    for line in lines:
+        if suspicions(list(line)):
+            yield line
+
+def add_suspicion_details(lines):
+    for line in lines:
+        if suspicions(list(line)):
+            yield list(line), suspicions(list(line))
+
+def count_items(lines):
+    return sum(1 for _ in lines)
+
+lines = read_log("network_traffic.log") # generator
+suspicious = filter_suspicious(lines) # generator
+detailed = add_suspicion_details(suspicious) # generator
+count = count_items(detailed)
+print(f"Total suspicious: {count}")
