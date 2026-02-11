@@ -50,3 +50,6 @@ def extract_hours(timestamps):
 
 def bytes_to_kilobytes(bytes_):
     return list(map(lambda byte: round(float(byte) / 1024, 1), bytes_))
+
+def filter_by_port_map(data):
+    return list(filter(lambda line: line[3] in SENSITIVE_PORTS, data))
