@@ -47,3 +47,6 @@ def filter_suspicions(suspects):
 
 def extract_hours(timestamps):
     return list (map(lambda timestamp: int(timestamp.split(" ")[1].split(":")[0]), timestamps))
+
+def bytes_to_kilobytes(bytes_):
+    return list(map(lambda byte: round(float(byte) / 1024, 1), bytes_))
