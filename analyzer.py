@@ -79,4 +79,10 @@ def add_suspicion_details(lines):
             yield list(line), suspicions(list(line))
 
 def count_items(lines):
-    return sum(1 for line in lines if suspicions(list(line)))
+    return sum(1 for _ in lines)
+
+lines = read_log("network_traffic.log") # generator
+suspicious = filter_suspicious(lines) # generator
+detailed = add_suspicion_details(suspicious) # generator
+count = count_items(detailed)
+print(f"Total suspicious: {count}")
