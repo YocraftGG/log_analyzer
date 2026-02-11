@@ -22,6 +22,12 @@ def count_ip_calls(data):
 def map_port_to_protocol(data):
     return {line[3]:line[4] for line in data}
 
+def is_night_activity(hour):
+    if NIGHT_ACTIVITY[0] < NIGHT_ACTIVITY[1]:
+        return NIGHT_ACTIVITY[0] <= hour < NIGHT_ACTIVITY[1]
+    else:
+        return NIGHT_ACTIVITY[0] <= hour < 0 or hour < NIGHT_ACTIVITY[1]
+
 def suspicions(line):
     lst = []
     if not (line[1].startswith("192.168") or line[1].startswith("10")):
@@ -30,13 +36,9 @@ def suspicions(line):
         lst.append("PORT_SENSITIVE")
     if int(line[5]) > SIZE:
         lst.append("PACKET_LARGE")
-    hour = int(line[0].split(" ")[1].split(":")[0])
-    if NIGHT_ACTIVITY[0] < NIGHT_ACTIVITY[1]:
-        if NIGHT_ACTIVITY[0] <= hour < NIGHT_ACTIVITY[1]:
-            lst.append("ACTIVITY_NIGHT")
-    else:
-        if NIGHT_ACTIVITY[0] <= hour < 0 or hour < NIGHT_ACTIVITY[1]:
-            lst.append("ACTIVITY_NIGHT")
+    if is_night_activity(int(line[0].split(" ")[1].split(":")[0])):
+        lst.append("ACTIVITY_NIGHT")
+
     return lst
 
 def identifying_suspicions(data):
@@ -44,3 +46,24 @@ def identifying_suspicions(data):
 
 def filter_suspicions(suspects):
     return {ip:suspicions for ip, suspicions in suspects.items() if len(suspicions) >= 2}
+
+def extract_hours(timestamps):
+    return list (map(lambda timestamp: int(timestamp.split(" ")[1].split(":")[0]), timestamps))
+
+def bytes_to_kilobytes(bytes_):
+    return list(map(lambda byte: round(float(byte) / 1024, 1), bytes_))
+
+def filter_by_port_map(data):
+    return list(filter(lambda line: line[3] in SENSITIVE_PORTS, data))
+
+def filter_night_activity(data):
+    return list(filter(lambda line: is_night_activity(int(line[0].split(" ")[1].split(":")[0])), data))
+
+suspicion_checks = { "EXTERNAL_IP": lambda line: not (line[1].startswith("192.168") or line[1].startswith("10")),
+"SENSITIVE_PORT": lambda line: line[3] in SENSITIVE_PORTS, "LARGE_PACKET":
+lambda line: int(line[5]) > SIZE, "NIGHT_ACTIVITY": lambda line: is_night_activity(int(line[0].split(" ")[1].split(":")[0]))}
+
+def line_checks(line, checks):
+    return list(map(lambda sus: sus[0], filter(lambda sus: sus[1](line), checks.items())))
+
+data_checks = list(filter(lambda suspicions: suspicions,map(lambda line: line_checks(line, suspicion_checks), load_csv("network_traffic.log"))))
