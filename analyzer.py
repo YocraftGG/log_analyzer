@@ -67,3 +67,8 @@ def line_checks(line, checks):
     return list(map(lambda sus: sus[0], filter(lambda sus: sus[1](line), checks.items())))
 
 data_checks = list(filter(lambda suspicions: suspicions,map(lambda line: line_checks(line, suspicion_checks), load_csv("network_traffic.log"))))
+
+def filter_suspicious(lines):
+    for line in lines:
+        if suspicions(list(line)):
+            yield line
