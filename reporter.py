@@ -1,5 +1,5 @@
 from analyzer import total_lines_read, total_lines_suspected, total_lines_external, total_lines_sensitive, \
-    total_lines_large, total_lines_night
+    total_lines_large, total_lines_night, filtered_ips
 
 
 def generate_report(suspicious_dict):
@@ -24,3 +24,8 @@ def generate_report(suspicious_dict):
     for ip, suspicious in suspicious_dict.items():
         if len(suspicious) < 3:
             yield f"- {ip}: {", ".join(suspicious)}\n"
+
+def save_reporter(report, filepath):
+    with open(filepath, "w", encoding="utf-8") as f:
+        for line in report:
+            f.write(line)
