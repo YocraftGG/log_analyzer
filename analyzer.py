@@ -89,7 +89,7 @@ total_lines_sensitive = 0
 total_lines_large = 0
 total_lines_night = 0
 
-def update_statistics(path):
+def update_statistics(filepath):
     global total_lines_read
     global total_lines_suspected
     global total_lines_external
@@ -97,7 +97,7 @@ def update_statistics(path):
     global total_lines_large
     global total_lines_night
 
-    lines = list(read_log(path))
+    lines = list(read_log(filepath))
     total_lines_read = count_items(lines)
 
     suspicious = list(filter_suspicious(lines))
@@ -112,3 +112,11 @@ def update_statistics(path):
     total_lines_sensitive = count_items(sensitive)
     total_lines_large = count_items(large)
     total_lines_night = count_items(night)
+
+def log_analyze(filepath):
+    lines = read_log(filepath)
+    suspicious = filter_suspicious(lines)
+    details = add_suspicion_details(suspicious)
+    dict_ip_suspicions = identifying_suspicions(list(read_log(filepath)))
+    filtered_ips = filter_suspicions(dict_ip_suspicions)
+    update_statistics(filepath)
