@@ -1,31 +1,31 @@
-from analyzer import total_lines_read, total_lines_suspected, total_lines_external, total_lines_sensitive, \
-    total_lines_large, total_lines_night, filtered_ips
+import analyzer
 
 
 def generate_report(suspicious_dict):
-    yield "=======================================\n"
-    yield "       לוח תעבורה חשודה\n"
-    yield "=======================================\n"
-    yield "\n"
-    yield "סטטיסטיקות כלליות:\n"
-    yield f"שורות שנקראו: {total_lines_read} -\n"
-    yield f"שורות חשודות: {total_lines_suspected} -\n"
-    yield f"- EXTERNAL_IP: {total_lines_external}\n"
-    yield f"- SENSITIVE_PORT: {total_lines_sensitive}\n"
-    yield f"- LARGE_PACKET: {total_lines_large}\n"
-    yield f"- NIGHT_ACTIVITY: {total_lines_night}\n"
-    yield "\n"
-    yield "IPs עם רמת סיכון גבוהה (3+ חשדות):\n"
+    report = "=======================================\n"
+    report += "       לוח תעבורה חשודה\n"
+    report += "=======================================\n"
+    report += "\n"
+    report += "סטטיסטיקות כלליות:\n"
+    report += f"שורות שנקראו: {analyzer.total_lines_read} -\n"
+    report += f"שורות חשודות: {analyzer.total_lines_suspected} -\n"
+    report += f"- EXTERNAL_IP: {analyzer.total_lines_external}\n"
+    report += f"- SENSITIVE_PORT: {analyzer.total_lines_sensitive}\n"
+    report += f"- LARGE_PACKET: {analyzer.total_lines_large}\n"
+    report += f"- NIGHT_ACTIVITY: {analyzer.total_lines_night}\n"
+    report += "\n"
+    report += "IPs עם רמת סיכון גבוהה (3+ חשדות):\n"
     for ip, suspicious in suspicious_dict.items():
         if len(suspicious) >= 3:
-            yield f"- {ip}: {", ".join(suspicious)}\n"
-    yield "\n"
-    yield "IPs חשודים נוספים:\n"
+            report += f"- {ip}: {", ".join(suspicious)}\n"
+    report += "\n"
+    report += "IPs חשודים נוספים:\n"
     for ip, suspicious in suspicious_dict.items():
         if len(suspicious) < 3:
-            yield f"- {ip}: {", ".join(suspicious)}\n"
+            report += f"- {ip}: {", ".join(suspicious)}\n"
+    return report
 
-def save_reporter(report, filepath):
+def save_report(report, filepath):
     with open(filepath, "w", encoding="utf-8") as f:
         for line in report:
             f.write(line)
