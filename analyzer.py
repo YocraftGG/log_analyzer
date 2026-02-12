@@ -81,8 +81,34 @@ def add_suspicion_details(lines):
 def count_items(lines):
     return sum(1 for _ in lines)
 
-lines = read_log("network_traffic.log") # generator
-suspicious = filter_suspicious(lines) # generator
-detailed = add_suspicion_details(suspicious) # generator
-count = count_items(detailed)
-print(f"Total suspicious: {count}")
+total_lines_read = 0
+total_lines_suspected = 0
+
+total_lines_external = 0
+total_lines_sensitive = 0
+total_lines_large = 0
+total_lines_night = 0
+
+def update_statistics(path):
+    global total_lines_read
+    global total_lines_suspected
+    global total_lines_external
+    global total_lines_sensitive
+    global total_lines_large
+    global total_lines_night
+
+    lines = list(read_log(path))
+    total_lines_read = count_items(lines)
+
+    suspicious = list(filter_suspicious(lines))
+    total_lines_suspected = count_items(suspicious)
+
+    detailed = list(add_suspicion_details(suspicious))  # generator
+    external = (e[0] for e in detailed if "IP_EXTERNAL" in e[1])
+    sensitive = (s[0] for s in detailed if "PORT_SENSITIVE" in s[1])
+    large = (l[0] for l in detailed if "PACKET_LARGE" in l[1])
+    night = (n[0] for n in detailed if "ACTIVITY_NIGHT" in n[1])
+    total_lines_external = count_items(external)
+    total_lines_sensitive = count_items(sensitive)
+    total_lines_large = count_items(large)
+    total_lines_night = count_items(night)
