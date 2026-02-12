@@ -31,13 +31,13 @@ def is_night_activity(hour):
 def suspicions(line):
     lst = []
     if not (line[1].startswith("192.168") or line[1].startswith("10")):
-        lst.append("IP_EXTERNAL")
+        lst.append("EXTERNAL_IP")
     if line[3] in SENSITIVE_PORTS:
-        lst.append("PORT_SENSITIVE")
+        lst.append("SENSITIVE_PORT")
     if int(line[5]) > SIZE:
-        lst.append("PACKET_LARGE")
+        lst.append("LARGE_PACKET")
     if is_night_activity(int(line[0].split(" ")[1].split(":")[0])):
-        lst.append("ACTIVITY_NIGHT")
+        lst.append("NIGHT_ACTIVITY")
 
     return lst
 
@@ -104,10 +104,10 @@ def update_statistics(filepath):
     total_lines_suspected = count_items(suspicious)
 
     detailed = list(add_suspicion_details(suspicious))  # generator
-    external = (e[0] for e in detailed if "IP_EXTERNAL" in e[1])
-    sensitive = (s[0] for s in detailed if "PORT_SENSITIVE" in s[1])
-    large = (l[0] for l in detailed if "PACKET_LARGE" in l[1])
-    night = (n[0] for n in detailed if "ACTIVITY_NIGHT" in n[1])
+    external = (e[0] for e in detailed if "EXTERNAL_IP" in e[1])
+    sensitive = (s[0] for s in detailed if "SENSITIVE_PORT" in s[1])
+    large = (l[0] for l in detailed if "LARGE_PACKET" in l[1])
+    night = (n[0] for n in detailed if "NIGHT_ACTIVITY" in n[1])
     total_lines_external = count_items(external)
     total_lines_sensitive = count_items(sensitive)
     total_lines_large = count_items(large)
@@ -120,3 +120,4 @@ def log_analyze(filepath):
     dict_ip_suspicions = identifying_suspicions(list(read_log(filepath)))
     filtered_ips = filter_suspicions(dict_ip_suspicions)
     update_statistics(filepath)
+    return details, filtered_ips
