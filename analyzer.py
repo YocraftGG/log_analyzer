@@ -2,6 +2,14 @@ from config import *
 from reader import *
 
 
+total_lines_read = 0
+total_lines_suspected = 0
+total_lines_external = 0
+total_lines_sensitive = 0
+total_lines_large = 0
+total_lines_night = 0
+
+
 def extract_external_ip(data):
     return [line[1] for line in data if not line[1].startswith("192.168") and not line[1].startswith("10")]
 
@@ -31,13 +39,13 @@ def is_night_activity(hour):
 def suspicions(line):
     lst = []
     if not (line[1].startswith("192.168") or line[1].startswith("10")):
-        lst.append("IP_EXTERNAL")
+        lst.append("EXTERNAL_IP")
     if line[3] in SENSITIVE_PORTS:
-        lst.append("PORT_SENSITIVE")
+        lst.append("SENSITIVE_PORT")
     if int(line[5]) > SIZE:
-        lst.append("PACKET_LARGE")
+        lst.append("LARGE_PACKET")
     if is_night_activity(int(line[0].split(" ")[1].split(":")[0])):
-        lst.append("ACTIVITY_NIGHT")
+        lst.append("NIGHT_ACTIVITY")
 
     return lst
 
@@ -59,15 +67,6 @@ def filter_by_port_map(data):
 def filter_night_activity(data):
     return list(filter(lambda line: is_night_activity(int(line[0].split(" ")[1].split(":")[0])), data))
 
-suspicion_checks = { "EXTERNAL_IP": lambda line: not (line[1].startswith("192.168") or line[1].startswith("10")),
-"SENSITIVE_PORT": lambda line: line[3] in SENSITIVE_PORTS, "LARGE_PACKET":
-lambda line: int(line[5]) > SIZE, "NIGHT_ACTIVITY": lambda line: is_night_activity(int(line[0].split(" ")[1].split(":")[0]))}
-
-def line_checks(line, checks):
-    return list(map(lambda sus: sus[0], filter(lambda sus: sus[1](line), checks.items())))
-
-data_checks = list(filter(lambda suspicions: suspicions,map(lambda line: line_checks(line, suspicion_checks), load_csv("network_traffic.log"))))
-
 def filter_suspicious(lines):
     for line in lines:
         if suspicions(list(line)):
@@ -81,8 +80,35 @@ def add_suspicion_details(lines):
 def count_items(lines):
     return sum(1 for _ in lines)
 
-lines = read_log("network_traffic.log") # generator
-suspicious = filter_suspicious(lines) # generator
-detailed = add_suspicion_details(suspicious) # generator
-count = count_items(detailed)
-print(f"Total suspicious: {count}")
+def update_statistics(filepath):
+    global total_lines_read
+    global total_lines_suspected
+    global total_lines_external
+    global total_lines_sensitive
+    global total_lines_large
+    global total_lines_night
+
+    lines = list(read_log(filepath))
+    total_lines_read = count_items(lines)
+
+    suspicious = list(filter_suspicious(lines))
+    total_lines_suspected = count_items(suspicious)
+
+    external = extract_external_ip(suspicious)
+    sensitive = filter_by_port(suspicious)
+    large = filter_by_size(suspicious)
+    night = filter_night_activity(suspicious)
+
+    total_lines_external = count_items(external)
+    total_lines_sensitive = count_items(sensitive)
+    total_lines_large = count_items(large)
+    total_lines_night = count_items(night)
+
+def analyze_log(filepath):
+    lines = read_log(filepath)
+    suspicious = filter_suspicious(lines)
+    details = add_suspicion_details(suspicious)
+    dict_ip_suspicions = identifying_suspicions(list(read_log(filepath)))
+    filtered_ips = filter_suspicions(dict_ip_suspicions)
+    update_statistics(filepath)
+    return filtered_ips
